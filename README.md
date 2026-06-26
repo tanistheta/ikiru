@@ -210,53 +210,86 @@ though it cannot yet be attributed to CODEOWNERS with confidence.
 
 ```
 .
-├── README.md                          # this file
-├── build_did_panel.py                 # constructs the repo-week panel
-├── expand_repo_pool.py                # builds the candidate repo pool
-├── find_codeowners_date.py            # identifies exact treatment dates via GitHub API
-├── codeowners_treatment_da[tes].py    # treatment-date assembly
-├── controls_to_drop_for_balance.txt   # balance-check exclusion list
-├── balance_check_and_rerun.[ipynb/py] # control-group balance diagnostic + re-run
-├── placebo_test.py                    # 200-iteration placebo test
-├── robustness_monthly.py              # monthly-bin robustness regression
-├── plot_event_study.py                # generates the event-study figure
-├── compute_codeowners_coverage.py     # per-repo CODEOWNERS file coverage %
-├── heterogeneity_by_coverage.py       # split-sample regression by coverage bucket
-├── did_panel.csv                      # final repo-week analysis panel
-├── final_treated_repos.csv            # treated repos with treatment dates
-├── codeowners_coverage.csv            # per-repo coverage % and bucket
-├── placebo_test_results.csv           # 200 placebo run outcomes
-├── panelols_summary.txt               # main quarterly regression output
-├── panelols_balanced_summary.txt      # rebalanced-panel regression output
-├── robustness_monthly_summary.txt     # monthly regression output
-├── heterogeneity_low_summary.txt      # low-coverage split regression output
-├── heterogeneity_high_summary.txt     # high-coverage split regression output
-└── event_study_plot.png               # main results figure
+├── README.md
+├── .gitignore
+├── scripts/
+│   ├── 01_expand_repo_pool.py            # builds the candidate repo pool
+│   ├── 02_find_codeowners_date.py        # identifies exact treatment dates via GitHub API
+│   ├── 03_build_did_panel.py             # constructs the repo-week panel
+│   ├── 04_compute_codeowners_coverage.py # per-repo CODEOWNERS file coverage %
+│   ├── 05_plot_event_study.py            # generates the event-study figure
+│   └── robustness/
+│       ├── balance_check_and_rerun.py    # control-group balance diagnostic + re-run
+│       ├── placebo_test.py               # 200-iteration placebo test
+│       ├── robustness_monthly.py         # monthly-bin robustness regression
+│       └── heterogeneity_by_coverage.py  # split-sample regression by coverage bucket
+├── data/
+│   ├── raw/            # gitignored — large BigQuery pulls, regenerable
+│   │   ├── pr_data_clean.csv
+│   │   ├── pr_open_close_2021_2026.csv
+│   │   └── repo_activity_summary.csv
+│   ├── pipeline/       # gitignored — intermediate pool/date-discovery files
+│   │   ├── expanded_pool_clean.csv
+│   │   ├── expanded_pool_excluded.csv
+│   │   ├── expanded_codeowners_dates.csv
+│   │   ├── expanded_codeowners_dates_round2.csv
+│   │   └── codeowners_treatment_dates.csv
+│   └── final/          # tracked — needed to verify/rerun the analysis
+│       ├── final_treated_repos.csv
+│       ├── pr_open_close_final_89repos.csv
+│       ├── did_panel.csv
+│       ├── reg_panel_monthly.csv
+│       ├── reg_panel_with_dummies.csv
+│       ├── codeowners_coverage.csv
+│       └── controls_to_drop_for_balance.txt
+└── results/
+    ├── figures/
+    │   └── event_study_plot.png
+    └── summaries/
+        ├── panelols_summary.txt
+        ├── panelols_balanced_summary.txt
+        ├── robustness_monthly_summary.txt
+        ├── heterogeneity_low_summary.txt
+        ├── heterogeneity_high_summary.txt
+        └── placebo_test_results.csv
 ```
+
+`data/raw/` and `data/pipeline/` are excluded from version control (see
+`.gitignore`) since they're large and fully regenerable from the scripts in
+order — only `data/final/` and `results/` are tracked, since those are what's
+needed to verify or extend the analysis without redoing the BigQuery scan.
 
 ## Reproducing This Study
 
 1. **Build the repo pool and identify treatment dates** — requires a
-   GitHub personal access token (`GITHUB_TOKEN` env var; never commit this).
+   GitHub personal access token (`GITHUB_TOKEN` env var; never commit this):
+   ```bash
+   python scripts/01_expand_repo_pool.py
+   python scripts/02_find_codeowners_date.py
+   ```
 2. **Pull outcome data from GH Archive via BigQuery** — note this scans
    the full table history (~21TB); budget accordingly.
-3. **Build the panel and run the main regression**:
+3. **Build the panel**:
    ```bash
    pip install pandas linearmodels
-   python build_did_panel.py
-   python run_main_regression.py
+   python scripts/03_build_did_panel.py
    ```
 4. **Run robustness checks**:
    ```bash
-   python placebo_test.py
-   python balance_check_and_rerun.py
-   python robustness_monthly.py
+   python scripts/robustness/placebo_test.py
+   python scripts/robustness/balance_check_and_rerun.py
+   python scripts/robustness/robustness_monthly.py
    ```
 5. **Run the coverage heterogeneity check** (requires `GITHUB_TOKEN`):
    ```bash
-   python compute_codeowners_coverage.py
-   python heterogeneity_by_coverage.py
+   python scripts/04_compute_codeowners_coverage.py
+   python scripts/robustness/heterogeneity_by_coverage.py
    ```
+6. **Regenerate the figure**:
+   ```bash
+   python scripts/05_plot_event_study.py
+   ```
+
 
 ## References
 
