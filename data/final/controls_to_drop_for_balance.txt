@@ -1,0 +1,19 @@
+Controls dropped for activity-level balance (threshold = treated group's 10th percentile, 475 PRs):
+2dust/v2rayN
+Alamofire/Alamofire
+BurntSushi/ripgrep
+ShareX/ShareX
+airbnb/javascript
+anthropics/skills
+clash-verge-rev/clash-verge-rev
+danielmiessler/SecLists
+ggml-org/whisper.cpp
+guzzle/guzzle
+icsharpcode/ILSpy
+macrozheng/mall
+microsoft/markitdown
+rxhanson/Rectangle
+shadowsocks/shadowsocks-windows
+square/leakcanary
+termux/termux-app
+tesseract-ocr/tesseract
